@@ -1,0 +1,15 @@
+.env
+venv
+dist
+build
+**/*.egg-info
+**/__pycache__/*
+
+# Sensitive Information:
+# Ignore all csv files (data)
+*.csv
+# Ignore all h5 files (trained models)
+*.h5
+
+.aider.*
+.idea
