@@ -1,4 +1,4 @@
-![](https://github.com/TimDommett/Singularity-BCI/blob/TimDommett-uploading-repo-art/singularity_github_bannrt.png?raw=true)
+![](https://github.com/TimDommett/Singularity-BCI/blob/main/singularity_github_bannrt.png?raw=true)
 
 # 🧠 Singularity 🧠
 
