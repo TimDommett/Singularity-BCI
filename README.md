@@ -1,3 +1,5 @@
+![](https://github.com/TimDommett/Singularity-BCI/blob/TimDommett-uploading-repo-art/singularity_github_bannrt.png?raw=true)
+
 # 🧠 Singularity 🧠
 
 ## Thought to Text BCI Project 🧠⌨️
