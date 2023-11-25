@@ -1,0 +1,6 @@
+1. Make GUI input persistent and encrypted
+1. Add seperate capture for playing games with a controller
+2. See if updated version of neurosity sdk does any better
+3. Automate saving backups of brain data and encrypt it
+4. Add gui for training
+5. Add gui for starting predictions and input

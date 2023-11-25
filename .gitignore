@@ -13,3 +13,7 @@ build
 
 .aider.*
 .idea
+
+#Ignore all .key files (private keys) and credentials like .enc files (encrypted files)
+*.key
+*.enc
