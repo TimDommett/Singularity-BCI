@@ -1,18 +1,33 @@
 import tkinter as tk
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import numpy as np  # Make sure to import numpy
 from tkinter import scrolledtext, messagebox
 from neurosity_manager import NeurosityManager
 from encryption_util import load_key, encrypt_message, decrypt_message
 import json
 import os
 
+
 class NeurosityGUI:
     def __init__(self, root):
+        self.figure = None
+        self.canvas = None
+        self.ax = None
+        self.lines = None
+        self.log_area = None
+        self.log_area_scroll = None
+        self.device_id_entry = None
+        self.email_entry = None
+        self.password_entry = None
         self.root = root
-        self.manager = NeurosityManager()
+        self.manager = NeurosityManager(self)
         self.create_widgets()
         self.fernet = load_key()
         self.credentials_file = "credentials.enc"
         self.load_credentials()
+        # Create the plot
+        self.create_plot()
 
     def load_credentials(self):
         if os.path.exists(self.credentials_file):
@@ -88,6 +103,45 @@ class NeurosityGUI:
         self.manager.stop_brainwaves_collection()
         self.manager.stop_key_logging()
         self.log_area.insert(tk.END, "Data collection stopped.\n")
+
+    def create_plot(self):
+        self.fig, self.axes = plt.subplots(8, 1, figsize=(6, 10))  # 8 subplots for 8 channels
+        self.fig.subplots_adjust(hspace=0.5)  # Adjust the space between plots
+        self.colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'orange']  # Different colors for each line
+        for ax, color in zip(self.axes, self.colors):
+            ax.set_title('EEG Channel Data')
+            ax.set_prop_cycle('color', [color])
+            ax.set_xlabel('Time (s)')  # Set x-axis label
+            ax.set_ylabel('Amplitude')  # Set y-axis label
+        self.canvas = FigureCanvasTkAgg(self.fig, self.root)
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+    def update_plot(self, timestamps, eeg_data):
+        # Convert datetime objects to UNIX timestamps
+        unix_timestamps = [timestamp.timestamp() for timestamp in timestamps]
+
+        for ax, channel_data, color in zip(self.axes, eeg_data, self.colors):
+            if ax.lines:  # If there are existing lines in the plot
+                line = ax.lines[0]
+                x_data, y_data = line.get_data()
+                x_data = np.append(x_data, unix_timestamps)
+                y_data = np.append(y_data, channel_data)
+            else:  # If no lines, initialize them
+                x_data = unix_timestamps
+                y_data = channel_data
+                ax.plot(x_data, y_data, color=color)
+
+            if len(x_data) > 200:  # Limit to last 200 data points
+                x_data = x_data[-200:]
+                y_data = y_data[-200:]
+
+            ax.set_xlim([min(x_data), max(x_data)])
+            ax.set_ylim([min(y_data), max(y_data)])
+            if ax.lines:
+                ax.lines[0].set_data(x_data, y_data)
+
+        self.canvas.draw()
+
 
 def run_gui():
     root = tk.Tk()
