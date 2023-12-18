@@ -7,6 +7,7 @@ import datetime
 from pynput import keyboard
 from encryption_util import load_key, encrypt_message, decrypt_message
 import json
+import pygame
 
 load_dotenv()
 
@@ -41,28 +42,29 @@ class NeurosityManager:
         with open(self.brain_data_csv_file, 'a') as file:
             writer = csv.writer(file)
             writer.writerow([data, timestamp])
+            print("Wrote line to brain_data.csv")
 
-        current_time = datetime.datetime.now()
-        num_points = len(data['data'][0])  # Assuming data['data'] is a list of lists
-
+        # current_time = datetime.datetime.now()
+        # num_points = len(data['data'][0])  # Assuming data['data'] is a list of lists
+        #
         # Generate timestamps in microseconds
-        timestamps = [current_time + datetime.timedelta(microseconds=i * self.time_step_micros) for i in
-                      range(num_points)]
-
-        self.data_buffer.append((timestamps, data['data']))
-
-        if len(self.data_buffer) >= self.buffer_size:
-            # Process buffer data
-            avg_timestamps = []
-            avg_data = [[] for _ in range(len(self.data_buffer[0][1]))]
-
-            for timestamps, data_points in self.data_buffer:
-                avg_timestamps.extend(timestamps)
-                for i, channel_data in enumerate(data_points):
-                    avg_data[i].extend(channel_data)
-
-            self.gui.root.after(0, self.gui.update_plot, avg_timestamps, avg_data)
-            self.data_buffer = []
+        # timestamps = [current_time + datetime.timedelta(microseconds=i * self.time_step_micros) for i in
+        #               range(num_points)]
+        #
+        # self.data_buffer.append((timestamps, data['data']))
+        #
+        # if len(self.data_buffer) >= self.buffer_size:
+        #     # Process buffer data
+        #     avg_timestamps = []
+        #     avg_data = [[] for _ in range(len(self.data_buffer[0][1]))]
+        #
+        #     for timestamps, data_points in self.data_buffer:
+        #         avg_timestamps.extend(timestamps)
+        #         for i, channel_data in enumerate(data_points):
+        #             avg_data[i].extend(channel_data)
+        #
+        #     self.gui.root.after(0, self.gui.update_plot, avg_timestamps, avg_data)
+        #     self.data_buffer = []
 
     def update_plot(self, eeg_data):
         # Assuming eeg_data is a list of lists of EEG values
@@ -87,9 +89,37 @@ class NeurosityManager:
             writer = csv.writer(file)
             writer.writerow([key, timestamp])
 
+    # Keystroke recording
+
     def start_key_logging(self):
         self.listener = keyboard.Listener(on_press=self.on_press)
         self.listener.start()
 
     def stop_key_logging(self):
         self.listener.stop()
+
+# Game controller recording
+    def initialize_controller(self):
+        pygame.init()
+        pygame.joystick.init()
+        if pygame.joystick.get_count() > 0:
+            self.joystick = pygame.joystick.Joystick(0)
+            self.joystick.init()
+            self.controller_log_csv_file = '../data/controller_log.csv'
+        else:
+            print("No PS5 DualSense controller found. Please connect the controller.")
+
+    def record_controller_input(self):
+        events = pygame.event.get()
+        for event in events:
+            if event.type in [pygame.JOYAXISMOTION, pygame.JOYBUTTONDOWN, pygame.JOYBUTTONUP]:
+                timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+                with open(self.controller_log_csv_file, 'a') as file:
+                    writer = csv.writer(file)
+                    writer.writerow([event.type, event.dict, timestamp])
+
+    def start_controller_logging(self):
+        self.initialize_controller()
+
+    def stop_controller_logging(self):
+        pygame.quit()
