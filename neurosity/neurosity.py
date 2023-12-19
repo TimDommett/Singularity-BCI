@@ -4,6 +4,7 @@ import signal
 import os
 
 from .config import FirebaseConfig
+import platform
 
 class NeurositySDK:
     def __init__(self, options):
@@ -21,10 +22,13 @@ class NeurositySDK:
         # For a normal exit
         atexit.register(self.exit_handler)
 
-        # register a signal handler for Forced Terminal Kills
+        # Register a signal handler for Forced Terminal Kills
         signal.signal(signal.SIGTERM, self.exit_handler)
         signal.signal(signal.SIGINT, self.exit_handler)
-        signal.signal(signal.SIGHUP, self.exit_handler)
+
+        # SIGHUP is not available on Windows
+        if platform.system() != "Windows":
+            signal.signal(signal.SIGHUP, self.exit_handler)
 
     def exit_handler(self, signum=None, frame=None):
         self.remove_client()
