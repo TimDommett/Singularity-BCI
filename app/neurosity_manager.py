@@ -44,6 +44,7 @@ class NeurosityManager:
 
     def get_signal_quality(self):
         status = self.neurosity.status_once()
+        # TODO: Move to GUI
         print('Battery:')
         print(status['battery'])
         print('Charging:')
