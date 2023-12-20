@@ -7,7 +7,7 @@ from neurosity_manager import NeurosityManager
 from encryption_util import load_key, encrypt_message, decrypt_message
 import json
 import os
-import mne
+from tkinter import Label
 
 
 class ScrollableFrame(tk.Frame):
@@ -124,6 +124,11 @@ class NeurosityGUI:
         self.device_id_entry = ttk.Entry(login_frame)
         self.device_id_entry.grid(row=0, column=1, sticky='nsew', padx=5)
 
+        # Signal Quality Label from self.manager.get_signal_quality()
+        tk.Label(login_frame, text="Signal Quality:", bg=self.bg_color, fg=self.fg_color).grid(row=0, column=2, sticky='e')
+        self.signal_quality_entry = ttk.Entry(login_frame)
+        self.signal_quality_entry.grid(row=0, column=3, sticky='nsew', padx=5)
+
         # Email Label and Entry
         tk.Label(login_frame, text="Email:", bg=self.bg_color, fg=self.fg_color).grid(row=1, column=0, sticky='e')
         self.email_entry = ttk.Entry(login_frame)
@@ -172,6 +177,9 @@ class NeurosityGUI:
         # Save credentials even if manually entered
         self.save_credentials(device_id, email, password)
         print("Logged in")
+        # Update the signal quality, fix it it was <function NeurositySDK.stream_from_path.<locals>.unsubscribe at 0x00000205D53D3D90>
+        self.signal_quality_entry.delete(0, tk.END)
+        self.signal_quality_entry.insert(0, self.manager.get_signal_quality())
 
     def start_collection(self):
         self.manager.start_brainwaves_collection()

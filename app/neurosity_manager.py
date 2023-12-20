@@ -35,9 +35,40 @@ class NeurosityManager:
             "email": email,
             "password": password
         })
+        print(self.neurosity.get_info())
 
     def get_info(self):
+        print('Getting info')
+        print(self.neurosity.get_info())
         return self.neurosity.get_info()
+
+    def get_signal_quality(self):
+        status = self.neurosity.status_once()
+        print('Battery:')
+        print(status['battery'])
+        print('Charging:')
+        print(status['charging'])
+        print('Status:')
+        print(status['state'])
+        return self.neurosity.signal_quality(
+            callback=self.signal_quality_callback
+        )
+
+    def get_status(self):
+        return self.neurosity.status(
+            callback=self.status_callback
+        )
+
+    def status_callback(self, data):
+        print(data)
+
+    def signal_quality_callback(self, data):
+        if data is None:
+            print("Received data is None")
+            return
+        # for each channel in the list print the status from the dictionary
+        statuses = [channel['status'] for channel in data]
+        print(statuses)
 
     def brainwaves_callback(self, data):
         if data is None:
@@ -184,7 +215,6 @@ class NeurosityManager:
         }
         return button_labels.get(button_code, f"Unknown({button_code})")
 
-
     def on_press(self, key):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         with open(self.key_stroke_log_csv_file, 'a') as file:
@@ -200,7 +230,7 @@ class NeurosityManager:
     def stop_key_logging(self):
         self.listener.stop()
 
-# Game controller recording
+    # Game controller recording
     def initialize_controller(self):
         pygame.init()
         pygame.joystick.init()
